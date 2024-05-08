@@ -1,10 +1,13 @@
-import { handleAuth } from "@kinde-oss/kinde-auth-nextjs/server";
-import { NextRequest } from "next/server";
+// vercel compile error, adjusted lines below
 
-export async function GET(
-    request: NextRequest,
+import { handleAuth } from '@kinde-oss/kinde-auth-nextjs/server';
+import { NextRequest, NextResponse } from 'next/server'; //add NextResponse
+
+export default async function handler( //add default, swap GET with handler
+    request: NextRequest, 
     { params }: any
-)   {
-        const endpoint = params.kindeAuth
-        return await handleAuth(request, endpoint)
+): Promise<Response> { //add proimse<repsonse>
+  const endpoint = params.kindeAuth;
+  const authHandler = handleAuth(request, endpoint); //all new
+  return await authHandler(request, NextResponse);
 }
