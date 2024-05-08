@@ -41,7 +41,7 @@ const Page = () => {
   );
 };
 
-const SuspendedPage = () => ( //
+const SuspendedPage = () => ( // add suspense boundary for deployment 
     <Suspense fallback={<div>Loading...</div>}>
         <Page />
     </Suspense>
