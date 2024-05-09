@@ -8,27 +8,31 @@ import Link from 'next/link';
 import { format } from 'date-fns';
 import { Button } from './ui/button';
 import { useState } from 'react';
+import { getUserSubscriptionPlan } from '@/lib/stripe';
 
-const Dashboard = () => {
+interface PageProps {
+  subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>;
+}
 
-const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<string | null>(
-  null
-  )
+const Dashboard = ({ subscriptionPlan }: PageProps) => {
+  const [currentlyDeletingFile, setCurrentlyDeletingFile] = useState<
+    string | null
+  >(null);
 
-const utils = trpc.useContext()
+  const utils = trpc.useContext();
 
   const { data: files, isLoading } = trpc.getUserFiles.useQuery();
 
   const { mutate: deleteFile } = trpc.deleteFile.useMutation({
     onSuccess: () => {
-      utils.getUserFiles.invalidate()
+      utils.getUserFiles.invalidate();
     },
-    onMutate({id}) {
-      setCurrentlyDeletingFile(id)
+    onMutate({ id }) {
+      setCurrentlyDeletingFile(id);
     },
     onSettled() {
-      setCurrentlyDeletingFile(null)
-    }
+      setCurrentlyDeletingFile(null);
+    },
   });
 
   return (
@@ -36,7 +40,7 @@ const utils = trpc.useContext()
       <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
         <h1 className='mb-3 font-bold text-5xl text-gray-900'>My Files</h1>
 
-        <UploadButton />
+        <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
       </div>
 
       {/* display all user files */}
@@ -77,8 +81,17 @@ const utils = trpc.useContext()
                     <MessageSquare className='h-4 w-4' />
                     mocked
                   </div>
-                  <Button onClick={() => deleteFile({id: file.id})}size='sm' className='w-full' variant='destructive'>
-                    {currentlyDeletingFile === file.id ? ( <Loader2 className='h-4 w-4 animate-spin' />) : <Trash className='h-4 w-4' />}
+                  <Button
+                    onClick={() => deleteFile({ id: file.id })}
+                    size='sm'
+                    className='w-full'
+                    variant='destructive'
+                  >
+                    {currentlyDeletingFile === file.id ? (
+                      <Loader2 className='h-4 w-4 animate-spin' />
+                    ) : (
+                      <Trash className='h-4 w-4' />
+                    )}
                   </Button>
                 </div>
               </li>
