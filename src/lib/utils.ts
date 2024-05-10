@@ -45,8 +45,8 @@ export function constructMetadata({
       creator: '@mdah',
     },
     icons,
-    metadataBase: new URL('https://followalong-quill.vercel.app'),
-    themeColor: '#FFF',
+    metadataBase: new URL('https://followalong-quill.vercel.app/'),
+    // themeColor: '#FFF'
     ...(noIndex && {
       robots: {
         index: false,
