@@ -60,7 +60,7 @@ const onUploadComplete = async ({
 
     const pageLevelDocs = await loader.load();
 
-    // added metadata filtering
+    // namespace not provided, so added metadata filtering
     pageLevelDocs.forEach((doc, i) => {
       doc.metadata = {
         ...doc.metadata,
@@ -88,7 +88,9 @@ const onUploadComplete = async ({
           id: createdFile.id,
         },
       });
-    } else {
+
+    } else { // added, otherwise uploadStatus  later set SUCCESS
+      
       // vectorize and index entire document
       const pineconeIndex = getPinecone();
 
