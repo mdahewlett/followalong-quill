@@ -59,6 +59,7 @@ const onUploadComplete = async ({
     const loader = new PDFLoader(blob);
 
     const pageLevelDocs = await loader.load();
+
     // added metadata filtering
     pageLevelDocs.forEach((doc, i) => {
       doc.metadata = {
@@ -87,36 +88,38 @@ const onUploadComplete = async ({
           id: createdFile.id,
         },
       });
+    } else {
+      // vectorize and index entire document
+      const pineconeIndex = getPinecone();
+
+      //add metadata filtering
+      for (const doc of pageLevelDocs) {
+        doc.metadata = { ...doc.metadata, fileId: createdFile.id };
+      }
+      // end add
+
+      const embeddings = new OpenAIEmbeddings({
+        openAIApiKey: process.env.OPENAI_API_KEY,
+      });
+
+      await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
+        pineconeIndex,
+        // removed namespace
+        // namespace: createdFile.id,
+      });
+
+      await db.file.update({
+        data: {
+          uploadStatus: 'SUCCESS',
+        },
+        where: {
+          id: createdFile.id,
+        },
+      });
     }
-
-    // vectorize and index entire document
-    const pineconeIndex = getPinecone();
-
-    //add metadata filtering
-    for (const doc of pageLevelDocs) {
-      doc.metadata = { ...doc.metadata, fileId: createdFile.id };
-    }
-    // end add
-
-    const embeddings = new OpenAIEmbeddings({
-      openAIApiKey: process.env.OPENAI_API_KEY,
-    });
-
-    await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
-      pineconeIndex,
-      // removed namespace
-      // namespace: createdFile.id,
-    });
-
-    await db.file.update({
-      data: {
-        uploadStatus: 'SUCCESS',
-      },
-      where: {
-        id: createdFile.id,
-      },
-    });
   } catch (err) {
+    console.log("There was an error, see below")
+    console.log(err)
     await db.file.update({
       data: {
         uploadStatus: 'FAILED',

@@ -12,25 +12,23 @@ interface ChatWrapperProps {
   fileId: string;
 }
 
-// extended type def, query not recozgnizing data?.status
-interface DataWithStatus {
-  status?: 'PENDING' | 'PROCESSING' | 'SUCCESS' | 'FAILED';
-}
-
 const ChatWrapper = ({ fileId }: ChatWrapperProps) => {
   const { data, isLoading } = trpc.getFileUploadStatus.useQuery(
     {
       fileId,
-    },
-    {
-      refetchInterval: (data) =>
-        (data as DataWithStatus)?.status === 'SUCCESS' || // added DWS
-        (data as DataWithStatus)?.status === 'FAILED' // added DWS
-          ? false
-          : 500,
     }
   );
 
+  const refetchInterval = () => // moved refetch out, works but why
+    (data?.status === 'SUCCESS' || data?.status === 'FAILED')
+      ? false
+      : 500;
+
+  trpc.getFileUploadStatus.useQuery(
+    { fileId },
+    { refetchInterval }
+  );
+  
   if (isLoading)
     return (
       <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
