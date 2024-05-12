@@ -4,19 +4,6 @@ import { headers } from 'next/headers';
 import type Stripe from 'stripe';
 
 export async function POST(request: Request) {
-
-  const checkoutSession = await stripe.checkout.sessions.create({
-    // Add other parameters as needed
-    success_url: 'https://followalong-quill.vercel.app/dashboard/billing',
-    cancel_url: 'https://followalong-quill.vercel.app/dashboard/billing',
-    // Add your custom return URL here
-    payment_intent_data: {
-      metadata: {
-        return_url: 'https://followalong-quill.vercel.app/dashboard/billing',
-      },
-    },
-  });
-
   const body = await request.text();
   const signature = headers().get('Stripe-Signature') ?? '';
 
@@ -64,6 +51,7 @@ export async function POST(request: Request) {
   }
 
   if (event.type === 'invoice.payment_succeeded') {
+    // Retrieve the subscription details from Stripe.
     const subscription = await stripe.subscriptions.retrieve(
       session.subscription as string
     );
