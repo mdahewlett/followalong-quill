@@ -43,6 +43,7 @@ const BillingForm = ({ subscriptionPlan }: BillingFormProps) => {
         onSubmit={(e) => {
           e.preventDefault();
           createStripeSession();
+          console.log('createStripeSession');
         }}
       >
         <Card>
