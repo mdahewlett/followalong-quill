@@ -4,6 +4,19 @@ import { headers } from 'next/headers';
 import type Stripe from 'stripe';
 
 export async function POST(request: Request) {
+
+  const checkoutSession = await stripe.checkout.sessions.create({
+    // Add other parameters as needed
+    success_url: 'https://example.com/success',
+    cancel_url: 'https://example.com/cancel',
+    // Add your custom return URL here
+    payment_intent_data: {
+      metadata: {
+        return_url: 'https://example.com/return',
+      },
+    },
+  });
+
   const body = await request.text();
   const signature = headers().get('Stripe-Signature') ?? '';
 
