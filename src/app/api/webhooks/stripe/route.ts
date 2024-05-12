@@ -7,12 +7,12 @@ export async function POST(request: Request) {
 
   const checkoutSession = await stripe.checkout.sessions.create({
     // Add other parameters as needed
-    success_url: 'https://example.com/success',
-    cancel_url: 'https://example.com/cancel',
+    success_url: 'https://followalong-quill.vercel.app/dashboard/billing',
+    cancel_url: 'https://followalong-quill.vercel.app/dashboard/billing',
     // Add your custom return URL here
     payment_intent_data: {
       metadata: {
-        return_url: 'https://example.com/return',
+        return_url: 'https://followalong-quill.vercel.app/dashboard/billing',
       },
     },
   });
