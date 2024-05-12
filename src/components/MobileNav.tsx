@@ -1,11 +1,19 @@
 'use client';
 
-import { ArrowRight, Menu } from 'lucide-react';
+import { getUserSubscriptionPlan } from '@/lib/stripe';
+import { ArrowRight, Gem, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
+interface PageProps { // refactor because destructuring isAuth and subscriptionPlan
+  isAuth: boolean;
+  subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>;
+
+}
+
+const MobileNav = ({ isAuth, subscriptionPlan }: PageProps) => { // added
+  
   const [isOpen, setOpen] = useState<boolean>(false);
 
   const toggleOpen = () => setOpen((prev) => !prev);
@@ -21,6 +29,8 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
       toggleOpen();
     }
   };
+  
+  console.log(subscriptionPlan?.isSubscribed)
 
   return (
     <div className='sm:hidden'>
@@ -76,6 +86,29 @@ const MobileNav = ({ isAuth }: { isAuth: boolean }) => {
                     Dashboard
                   </Link>
                 </li>
+
+                {/*start adding subscription opts */}
+                <li>
+                  {subscriptionPlan?.isSubscribed ? (
+                    <Link 
+                    onClick={() => closeOnCurrent('/dashbboard/billing')}
+                    className='flex items-center w-full font-semibold'
+                    href='/dashboard/billing'
+                  >
+                    Manage Subscription
+                  </Link>
+                    ) : (
+                    <Link 
+                    onClick={() => closeOnCurrent('/pricing')}
+                    className='flex items-center w-full font-semibold'
+                    href='/pricing'
+                    >
+                      Upgrade <Gem className='text-blue-600 h-4 w-4 ml-1.5' />
+                    </Link>
+                  )}
+                </li>
+                {/*end adding subscription opts*/}
+                
                 <li className='my-3 h-px w-full bg-gray-300' />
                 <li>
                   <Link
