@@ -1,9 +1,11 @@
-import { authMiddleware } from '@kinde-oss/kinde-auth-nextjs/server';
+// authMiddleware was redirecting logged in users from dashboard
+// used withAuth instead
+
+import { withAuth } from '@kinde-oss/kinde-auth-nextjs/server';
 
 export const config = {
-  // matcher: ['/dashboard/:path*', '/auth-callback'],
-  matcher: [], // was redirecting logged in user
+  matcher: ['/dashboard/:path*', '/auth-callback'],
 
 };
 
-export default authMiddleware;
+export default withAuth;
