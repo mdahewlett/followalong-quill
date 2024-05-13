@@ -181,8 +181,7 @@ const Page = async () => {
                           variant: 'secondary',
                         })}
                       >
-                        {user ? 'Upgrade now' : 'Sign up'}
-                        <ArrowRight className='h-5 w-5 ml-1.5' />
+                        {user ? 'Go to Dashboard' : 'Sign up'} {/* Free plan user direct to dashboard */}
                       </Link>
                     ) : user ? (
                       <UpgradeButton />
