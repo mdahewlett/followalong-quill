@@ -30,8 +30,6 @@ const MobileNav = ({ isAuth, subscriptionPlan }: PageProps) => { // added
     }
   };
   
-  console.log(subscriptionPlan?.isSubscribed)
-
   return (
     <div className='sm:hidden'>
       <Menu
@@ -108,7 +106,7 @@ const MobileNav = ({ isAuth, subscriptionPlan }: PageProps) => { // added
                   )}
                 </li>
                 {/*end adding subscription opts*/}
-                
+
                 <li className='my-3 h-px w-full bg-gray-300' />
                 <li>
                   <Link
