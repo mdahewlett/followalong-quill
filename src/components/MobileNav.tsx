@@ -77,7 +77,7 @@ const MobileNav = ({ isAuth, subscriptionPlan }: PageProps) => { // added
               <>
                 <li>
                   <Link
-                    onClick={() => closeOnCurrent('/dashbboard')}
+                    onClick={() => closeOnCurrent('/dashboard')}
                     className='flex items-center w-full font-semibold'
                     href='/dashboard'
                   >
@@ -89,7 +89,7 @@ const MobileNav = ({ isAuth, subscriptionPlan }: PageProps) => { // added
                 <li>
                   {subscriptionPlan?.isSubscribed ? (
                     <Link 
-                    onClick={() => closeOnCurrent('/dashbboard/billing')}
+                    onClick={() => closeOnCurrent('/dashboard/billing')}
                     className='flex items-center w-full font-semibold'
                     href='/dashboard/billing'
                   >
