@@ -22,4 +22,4 @@ const pinecone = new Pinecone({
   apiKey
 })
 
-export const getPinecone = () => pinecone.Index("followalong");
+export const getPinecone = () => pinecone.Index("speedyreader");
