@@ -21,7 +21,7 @@ const Navbar = async () => {
       <MaxWidthWrapper>
         <div className='flex h-14 items-center justify-between border-b border-zinc-200'>
           <Link href='/' className='flex z-40 font-semibold'>
-            <span>Follow Along.</span>
+            <span>Speedy Reader</span>
           </Link>
 
           <MobileNav isAuth={!!user} subscriptionPlan={subscriptionPlan}/> {/*pass subscription plan*/}
