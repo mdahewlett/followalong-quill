@@ -13,8 +13,7 @@ import { buttonVariants } from '@/components/ui/button';
 import Link from 'next/link';
 import UpgradeButton from '@/components/UpgradeButton';
 
-const Page = async () => {
-  //added async
+const Page = async () => {  //added async
   const { getUser } = getKindeServerSession();
   const user = await getUser(); // added await
 

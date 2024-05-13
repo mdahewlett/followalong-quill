@@ -27,6 +27,11 @@ const nextConfig = {
     config.resolve.alias.encoding = false;
     return config;
   },
+
+  images: {
+    domains: ['lh3.googleusercontent.com'], // to allow google auth
+  },
+
 };
 
 export default nextConfig;
