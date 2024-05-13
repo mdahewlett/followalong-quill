@@ -12,11 +12,13 @@ const nextConfig = {
         destination: "/api/auth/register",
         permanent: true,
       },
+      // adding signout redirect
       {
         source: "/sign-out",
         destination: "/api/auth/logout",
         permanent: true,
       }
+      // end adding signout redirect
     ]
   },
 
