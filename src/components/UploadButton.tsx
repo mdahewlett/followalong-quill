@@ -67,7 +67,7 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
             description: `Your ${
               isSubscribed
                 ? 'Pro plan limit is 16 MB'
-                : 'Free plan limit is 4 MB, upgrade to the Pro plan for a limit of 16 MB'
+                : 'Upgrade to the Pro plan for a limit of 16 MB'
             }`,
             variant: 'destructive',
           });
