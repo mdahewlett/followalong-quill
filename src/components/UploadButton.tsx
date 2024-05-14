@@ -64,9 +64,9 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
 
           return toast({
             title: 'The file is too large',
-            description: `Your ${
+            description: `${
               isSubscribed
-                ? 'Pro plan limit is 16 MB'
+                ? 'Your Pro plan limit is 16 MB'
                 : 'Upgrade to the Pro plan for a limit of 16 MB'
             }`,
             variant: 'destructive',
@@ -202,3 +202,4 @@ const UploadButton = ({ isSubscribed }: { isSubscribed: boolean }) => {
 };
 
 export default UploadButton;
+

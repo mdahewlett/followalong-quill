@@ -38,6 +38,7 @@ export const appRouter = router({
 
     return { success: true };
   }),
+  
   getUserFiles: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
 
@@ -158,7 +159,10 @@ export const appRouter = router({
 
       if (!file) return { status: 'PENDING' as const };
 
-      return { status: file.uploadStatus };
+      return { 
+        status: file.uploadStatus,
+        pages: file.pages // add to easily update file status 
+       };
     }),
 
   getFile: privateProcedure
@@ -200,6 +204,43 @@ export const appRouter = router({
 
       return file;
     }),
+
+    // adding file update endpoint
+    updateFileUploadStatus: privateProcedure
+    .input(
+      z.object({
+        fileId: z.string(),
+        status: z.enum(['PENDING', 'SUCCESS', 'FAILED']),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const { fileId, status } = input;
+      const { userId } = ctx;
+
+      // Verify the user has access to this file
+      const file = await db.file.findFirst({
+        where: {
+          id: fileId,
+          userId,
+        },
+      });
+
+      if (!file) throw new TRPCError({ code: 'NOT_FOUND' });
+
+      // Update the file status
+      await db.file.update({
+        data: {
+          uploadStatus: status,
+        },
+        where: {
+          id: fileId,
+        },
+      });
+
+      return { success: true };
+    }),
+    // end add
+
 });
 
 export type AppRouter = typeof appRouter;

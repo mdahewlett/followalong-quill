@@ -1,115 +1,140 @@
-  'use client';
+'use client';
 
-  import { trpc } from '@/app/_trpc/client';
-  import ChatInput from './ChatInput';
-  import Messages from './Messages';
-  import { ChevronLeft, Loader2, XCircle } from 'lucide-react';
-  import Link from 'next/link';
-  import { buttonVariants } from '../ui/button';
-  import { ChatContextProvider } from './ChatContext';
-  import { getUserSubscriptionPlan } from '@/lib/stripe';
-  import { Document, Page, pdfjs } from 'react-pdf';
+import { trpc } from '@/app/_trpc/client';
+import ChatInput from './ChatInput';
+import Messages from './Messages';
+import { ChevronLeft, Loader2, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import { buttonVariants } from '../ui/button';
+import { ChatContextProvider } from './ChatContext';
+import { getUserSubscriptionPlan } from '@/lib/stripe';
+import { useEffect, useState } from 'react';
 
-  interface ChatWrapperProps {
-    fileId: string;
-    subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>; // added for pro user limits
-  }
+interface ChatWrapperProps {
+  fileId: string;
+  subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>; // added for dynamic user limits
+}
 
-  const ChatWrapper = ({ fileId, subscriptionPlan }: ChatWrapperProps) => { // added for pro user limits
+const ChatWrapper = ({ fileId, subscriptionPlan }: ChatWrapperProps) => { // added for dynamic user limits
 
-    const { data, isLoading } = trpc.getFileUploadStatus.useQuery(
-      {
-        fileId,
-      }
-    );
+  const { data, isLoading } = trpc.getFileUploadStatus.useQuery({
+    fileId,
+  });
 
-    const refetchInterval = () => // moved refetch out, works but why
-      (data?.status === 'SUCCESS' || data?.status === 'FAILED')
-        ? false
-        : 500;
+  const refetchInterval = () =>
+    // moved refetch out, works but why
+    data?.status === 'SUCCESS' || data?.status === 'FAILED' ? false : 500;
 
-    trpc.getFileUploadStatus.useQuery(
-      { fileId },
-      { refetchInterval }
-    );
-    
-    if (isLoading)
-      return (
-        <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
-          <div className='flex-1 flex justify-center items-center flex-col mb-28'>
-            <div className='flex flex-col items-center gap-2'>
-              <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
-              <h3 className='font-semibold text-xl'>Loading...</h3>
-              <p className='tex-zinc-500 text-sm'>
-                We&apos;re preparing your PDF.
-              </p>
-            </div>
-          </div>
+  trpc.getFileUploadStatus.useQuery({ fileId }, { refetchInterval });
 
-          <ChatInput isDisabled />
-        </div>
-      );
+  // add to update file status after subscription
+  const [uploadStatusUpdated, setUploadStatusUpdated] = useState(false);
 
-    if (data?.status === 'PROCESSING')
-      return (
-        <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
-          <div className='flex-1 flex justify-center items-center flex-col mb-28'>
-            <div className='flex flex-col items-center gap-2'>
-              <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
-              <h3 className='font-semibold text-xl'>Processing PDF...</h3>
-              <p className='tex-zinc-500 text-sm'>This won&apos;t take long.</p>
-            </div>
-          </div>
+  const { mutate: updateFileStatus } = trpc.updateFileUploadStatus.useMutation({
+    onSuccess: () => {
+      setUploadStatusUpdated(true);
+    },
+    onError: (error) => {
+      console.error('An error occurred while updating the file status', error);
+    },
+  });
+  
+  const planName = subscriptionPlan?.name ?? 'Free';
+  const planPages = subscriptionPlan?.pagesPerPdf ?? 5;
 
-          <ChatInput isDisabled />
-        </div>
-      );
+  useEffect(() => {
+    // enabling docs after upgrade
+    if (
+      data?.status === 'FAILED' &&
+      data.pages <= planPages &&
+      !uploadStatusUpdated
+    ) {
+      updateFileStatus({ fileId, status: 'SUCCESS' });
+    }
 
-    if (data?.status === 'FAILED')
-      // check if pages are okay, if yes, update status, if no, give error
-      // number of pages
-      // subscription plan - already have
-      // update database opt
+    // disabling docs after downgrade
+    if (
+      data?.status === 'SUCCESS' &&
+      data.pages >= planPages &&
+      !uploadStatusUpdated
+    ) {
+      updateFileStatus({ fileId, status: 'FAILED' });
+    }    
+  }, [data, planPages, fileId, uploadStatusUpdated, updateFileStatus]);
+  // end add
 
-
-      return (
-        <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
-          <div className='flex-1 flex justify-center items-center flex-col mb-28'>
-            <div className='flex flex-col items-center gap-2'>
-              <XCircle className='h-8 w-8 text-red-500' />
-              <h3 className='font-semibold text-xl'>Too many pages in PDF</h3>
-              <p className='tex-zinc-500 text-sm'>
-                Your <span className='font-medium'>{subscriptionPlan?.name}</span> plan supports up to{' '}
-                {subscriptionPlan?.pagesPerPdf} pages per PDF. {/* updated for pro user limits */}
-              </p>
-              <Link
-                href='/dashboard'
-                className={buttonVariants({
-                  variant: 'secondary',
-                  className: 'mt-4',
-                })}
-              >
-                <ChevronLeft className='h-3 w-3 mr-1.5' />
-                Back
-              </Link>
-            </div>
-          </div>
-
-          <ChatInput isDisabled />
-        </div>
-      );
-
+  if (isLoading)
     return (
-      <ChatContextProvider fileId={fileId}>
+      <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
+        <div className='flex-1 flex justify-center items-center flex-col mb-28'>
+          <div className='flex flex-col items-center gap-2'>
+            <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
+            <h3 className='font-semibold text-xl'>Loading...</h3>
+            <p className='tex-zinc-500 text-sm'>
+              We&apos;re preparing your PDF.
+            </p>
+          </div>
+        </div>
+
+        <ChatInput isDisabled />
+      </div>
+    );
+
+  if (data?.status === 'PROCESSING')
+    return (
+      <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
+        <div className='flex-1 flex justify-center items-center flex-col mb-28'>
+          <div className='flex flex-col items-center gap-2'>
+            <Loader2 className='h-8 w-8 text-blue-500 animate-spin' />
+            <h3 className='font-semibold text-xl'>Processing PDF...</h3>
+            <p className='tex-zinc-500 text-sm'>This won&apos;t take long.</p>
+          </div>
+        </div>
+
+        <ChatInput isDisabled />
+      </div>
+    );
+
+  if (data?.status === 'FAILED')
+    return (
+      <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
+        <div className='flex-1 flex justify-center items-center flex-col mb-28'>
+          <div className='flex flex-col items-center gap-2'>
+            <XCircle className='h-8 w-8 text-red-500' />
+            <h3 className='font-semibold text-xl'>Too many pages in PDF</h3>
+            <p className='tex-zinc-500 text-sm'>
+              Your <span className='font-medium'>{planName}</span> plan supports
+              up to {planPages} pages per PDF.
+              {/* updated for pro user limits */}
+            </p>
+            <Link
+              href='/dashboard'
+              className={buttonVariants({
+                variant: 'secondary',
+                className: 'mt-4',
+              })}
+            >
+              <ChevronLeft className='h-3 w-3 mr-1.5' />
+              Back
+            </Link>
+          </div>
+        </div>
+
+        <ChatInput isDisabled />
+      </div>
+    );
+
+  return (
+    <ChatContextProvider fileId={fileId}>
       <div className='relative min-h-full bg-zinc-50 flex divide-y divide-zinc-200 flex-col justify-between gap-2'>
         <div className='flex-1 justify-between flex flex-col mb-28'>
-          <Messages fileId={fileId}/>
+          <Messages fileId={fileId} />
         </div>
 
         <ChatInput />
       </div>
-      </ChatContextProvider>
-    );
-  };
+    </ChatContextProvider>
+  );
+};
 
-  export default ChatWrapper;
+export default ChatWrapper;

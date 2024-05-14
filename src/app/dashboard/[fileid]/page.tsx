@@ -18,6 +18,8 @@ const Page = async ({ params }: PageProps) => {
   const user = await getUser();
   const subscriptionPlan = await getUserSubscriptionPlan(); // added 
 
+  console.log("page subscriptionPlan:", subscriptionPlan) // debug
+
   if (!user || !user.id) redirect(`/auth-callback?origin=dashboard/${fileid}`);
 
   // make database call
@@ -50,3 +52,4 @@ const Page = async ({ params }: PageProps) => {
 };
 
 export default Page;
+

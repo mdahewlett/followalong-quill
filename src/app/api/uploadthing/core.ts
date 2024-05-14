@@ -83,7 +83,7 @@ const onUploadComplete = async ({
       await db.file.update({
         data: {
           uploadStatus: 'FAILED',
-          pages: pagesAmt
+          pages: pagesAmt,
         },
         where: {
           id: createdFile.id,
@@ -114,6 +114,7 @@ const onUploadComplete = async ({
       await db.file.update({
         data: {
           uploadStatus: 'SUCCESS',
+          pages: pagesAmt,
         },
         where: {
           id: createdFile.id,
@@ -144,3 +145,4 @@ export const ourFileRouter = {
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+
