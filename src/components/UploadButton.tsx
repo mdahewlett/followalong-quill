@@ -59,9 +59,16 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
         const res = await startUpload(acceptedFile);
 
         if (!res) {
+          clearInterval(progressInterval); // stop upload progress
+          setIsUploading(false); // stop upload
+
           return toast({
-            title: 'Something went wrong',
-            description: 'Please try again later',
+            title: 'The file is too large',
+            description: `Your ${
+              isSubscribed
+                ? 'Pro plan limit is 16 MB'
+                : 'Free plan limit is 4 MB, upgrade to the Pro plan for a limit of 16 MB'
+            }`,
             variant: 'destructive',
           });
         }
@@ -70,6 +77,9 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
         const key = fileResponse?.key;
 
         if (!key) {
+          clearInterval(progressInterval); // stop upload progress
+          setIsUploading(false); // stop upload
+
           return toast({
             title: 'Something went wrong',
             description: 'Please try again later',
@@ -99,13 +109,20 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
                   <span className='font-semibold'>Click to upload</span> or drag
                   and drop
                 </p>
-                <p className='text-xs text-zinc-500'>PDF (up to {isSubscribed ? "16" : "4"}MB)</p>
+                <p className='text-xs text-zinc-500'>
+                  PDF (up to {isSubscribed ? '16' : '4'}MB)
+                </p>
               </div>
 
               {acceptedFiles && acceptedFiles[0] ? (
                 <div className='max-w-xs bg-white flex items-center rounded-md overflow-hidden outline outline-[1px] outline-zinc-200 divide-x divide-zinc-200 '>
                   <div className='px-3 py-2 h-full grid place-items-center'>
-                    <File className='h-4 w-4 text-blue-500' />
+                    <File
+                      className={`h-4 w-4 ${
+                        isUploading ? 'text-blue-500' : 'text-red-500'
+                      }`}
+                    />{' '}
+                    {/* feedback on upload fail */}
                   </div>
                   <div className='px-3 py-2 h-full text-sm truncate'>
                     {acceptedFiles[0].name}
@@ -114,6 +131,7 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
               ) : null}
 
               {isUploading ? (
+                // user feedback on full upload
                 <div className='w-full mt-4 max-w-xs mx-auto'>
                   <Progress
                     indicatorColor={
@@ -129,7 +147,22 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
                     </div>
                   ) : null}
                 </div>
-              ) : null}
+              ) : (
+                // user feedback on upload fail
+                <div className='w-full mt-4 max-w-xs mx-auto'>
+                  <Progress
+                    indicatorColor={'bg-red-500'}
+                    value={uploadProgress}
+                    className='h-1 wi-full bg-zinc-200'
+                  />
+                  {uploadProgress !== 0 ? (
+                    <div className='flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2'>
+                    Your file is {((acceptedFiles[0].size)/(1000000)).toFixed(1)} MB
+                  </div>
+                  ) : null}
+                  
+                </div>
+              )}
 
               <input
                 {...getInputProps()}

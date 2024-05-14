@@ -89,7 +89,7 @@ const onUploadComplete = async ({
         },
       });
 
-    } else { // added, otherwise uploadStatus  later set SUCCESS
+    } else { // added, otherwise uploadStatus later set SUCCESS
       
       // vectorize and index entire document
       const pineconeIndex = getPinecone();
