@@ -3,6 +3,7 @@ import PdfRenderer from '@/components/PdfRenderer';
 import { db } from '@/db';
 import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 import { notFound, redirect } from 'next/navigation';
+import { getUserSubscriptionPlan } from '@/lib/stripe';
 
 interface PageProps {
   params: {
@@ -15,6 +16,7 @@ const Page = async ({ params }: PageProps) => {
 
   const { getUser } = getKindeServerSession();
   const user = await getUser();
+  const subscriptionPlan = await getUserSubscriptionPlan(); // added 
 
   if (!user || !user.id) redirect(`/auth-callback?origin=dashboard/${fileid}`);
 
@@ -38,8 +40,9 @@ const Page = async ({ params }: PageProps) => {
           </div>
         </div>
 
+        {/* right side */}
         <div className='shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0'>
-          <ChatWrapper fileId={file.id}/>
+          <ChatWrapper fileId={file.id} subscriptionPlan={subscriptionPlan}/> {/* passed subscription info */}
         </div>
       </div>
     </div>
