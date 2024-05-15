@@ -33,13 +33,6 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
 
   const backUpMessage = useRef('');
 
-  /*
-// remove "0:" prefix
-  const processChunk = (chunkValue: string) => {
-    return chunkValue.replace(/0:"([^"]*)"/g,'$1').trim();
-  }
-  */
-
   const { mutate: sendMessage } = useMutation({
     mutationFn: async ({ message }: { message: string }) => {
       const response = await fetch('/api/message', {
@@ -107,6 +100,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
           previousMessages?.pages.flatMap((page) => page.messages) ?? [],
       };
     },
+
     onSuccess: async (stream) => {
       setIsLoading(false);
 
@@ -130,7 +124,17 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
         done = doneReading;
         const chunkValue = decoder.decode(value);
 
-        accResponse += chunkValue;
+        // content comes in as /0:"CONTENT" / and we want /CONTENT/
+        const chunks = chunkValue.split('0:');
+        let processedChunk = '';
+
+        chunks.forEach(chunk => {
+          const trimmedChunk = chunk.slice(1, -2);
+          processedChunk += trimmedChunk
+        });
+        
+        accResponse += processedChunk;
+        // end reformat
 
         // append chunk to the actual message
         utils.getFileMessages.setInfiniteData(

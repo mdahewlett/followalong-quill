@@ -58,10 +58,9 @@ export const POST = async (req: NextRequest) => {
 
   const pineconeIndex = getPinecone();
 
-  // adding filter metadata
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex,
-    filter: { fileId },
+    filter: { fileId }, // adding filter metadata
   });
 
   const results = await vectorStore.similaritySearch(message, 4);
@@ -115,6 +114,19 @@ export const POST = async (req: NextRequest) => {
 
   const stream = OpenAIStream(response, {
     async onCompletion(completion) {
+
+      // Remove the "O:" prefix and split the completion into individual words
+      const words = completion
+        .replace(/O:"/g, '')
+        .split(' ')
+        .filter((word) => word !== ''); // Filter out empty strings
+
+      // Reconstruct the sentence from the individual words
+      const formattedCompletion = words.join(' ');
+
+      // Display the formatted completion
+      console.log(formattedCompletion);
+      
       await db.message.create({
         data: {
           text: completion,
