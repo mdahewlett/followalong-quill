@@ -157,7 +157,7 @@ const UpoloadDropZone = ({ isSubscribed }: { isSubscribed: boolean }) => {
                   />
                   {uploadProgress !== 0 ? (
                     <div className='flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2'>
-                    Your file is {((acceptedFiles[0].size)/(1000000)).toFixed(1)} MB
+                    Your file is too large
                   </div>
                   ) : null}
                   
